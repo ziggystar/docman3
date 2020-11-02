@@ -1,7 +1,11 @@
+import classes from '*.module.css';
+import { AppBar, Container, Icon, IconButton, InputBase, Paper, Toolbar } from '@material-ui/core';
+import { ColDef, DataGrid } from '@material-ui/data-grid';
 import React, { FunctionComponent, useEffect, useState } from 'react';
 import './App.css';
 
 type Document = {
+  id: string,
   correspondent: string,
   subject: string,
   date: string
@@ -24,23 +28,15 @@ const DocList: FunctionComponent<{}> = () => {
     }
   }, [rows]);
 
-  return <table>
-    <thead>
-      <tr>
-        <th>Korrespondent</th>
-        <th>Betreff</th>
-        <th>Datum</th>
-      </tr>
-    </thead>
-    <tbody>
-      {(rows ?? []).map(r =>
-        <tr>
-          <td>{r.correspondent}</td>
-          <td>{r.subject}</td>
-          <td>{r.date}</td>
-        </tr>)}
-    </tbody>
-  </table>
+  const cols: ColDef[] = [
+    { field: "correspondent", headerName: "Korrepondent", width: 300 },
+    { field: "subject", headerName: "Betreff", width: 600 },
+    { field: "date", headerName: "Datum", type: "date", width: 120 }
+  ];
+
+  return <Paper style={{ height: '80vh', width: '100%' }}>
+    <DataGrid rows={rows ?? []} columns={cols} />
+  </Paper>
 }
 
 function App() {
@@ -48,7 +44,9 @@ function App() {
     <div className="App">
       <header className="App-header">
         <h1>Docman 3</h1>
-        <DocList />
+        <Container>
+          <DocList />
+        </Container>
       </header>
     </div>
   );
