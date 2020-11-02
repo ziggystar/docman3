@@ -11,7 +11,13 @@ def main(): # NEW except for the call to processInput
 
     form = cgi.FieldStorage()      # standard cgi script lines to here!
     
-    print(json.dumps([{"subject": x[0], "date": x[1]} for x in c.execute("select subject, date from document")]))
+    print(json.dumps([{
+        "id": x[0], 
+        "correspondent": x[1],
+        "subject": x[2],   
+        "date": x[3], 
+        "fileName": x[4]
+        } for x in c.execute("select id, correspondent, subject, date, name from document")]))
 
 try:   # NEW
     print("Content-type: application/json\r\n")   # say generating html
