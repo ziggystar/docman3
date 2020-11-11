@@ -1,58 +1,20 @@
-import { AppBar, Box, createStyles, fade, Grid, Icon, IconButton, InputBase, makeStyles, Paper, Theme, Toolbar, Typography } from '@material-ui/core';
-import { ColDef, DataGrid, ValueFormatterParams } from '@material-ui/data-grid';
-import React, { FunctionComponent, useEffect, useState } from 'react';
+import { AppBar, Box, Container, createStyles, CssBaseline, fade, Grid, Icon, IconButton, InputBase, makeStyles, Paper, Theme, Toolbar, Typography } from '@material-ui/core';
+import React, { FunctionComponent, useState } from 'react';
 import './App.css';
-
-type Document = {
-  id: string,
-  correspondent: string,
-  subject: string,
-  date: string,
-  path: string
-}
-
-const DocList: FunctionComponent<{ search: string | undefined, setSelection: (v: string) => void }> = (props) => {
-
-  const [rows, setRows] = useState<Document[] | null>(null);
-
-  useEffect(() => {
-      fetch("/api/list.py" + (props.search !== undefined ? ("?search=" + encodeURI(props.search ?? "")) : ""))
-        .then(res => res.json())
-        .then(setRows,
-          // Note: it's important to handle errors here
-          // instead of a catch() block so that we don't swallow
-          // exceptions from actual bugs in components.
-          (error) => { setRows([]) }
-        )
-  }, [props.search]);
-
-  const cols: ColDef[] = [
-    { field: "correspondent", headerName: "Korrepondent", width: 100 },
-    { field: "subject", headerName: "Betreff", width: 300 },
-    { field: "date", headerName: "Datum", type: "date", width: 130 },
-    {
-      field: "path", headerName: "Download", width: 100,
-      renderCell: (params: ValueFormatterParams) => (<a href={"/api/render.py?path=" + params.value?.toString()}>Download</a>)
-    }
-  ];
-
-  return <Paper style={{ padding: '1em', height: '80vh', width: '100%' }}>
-    <DataGrid rows={rows ?? []} columns={cols} onSelectionChange={params => {
-      if (params.rows.length > 0) {
-        props.setSelection(params.rows[0]["path"])
-      }
-    }
-    } />
-  </Paper>
-}
+import { DocList } from './DocList';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     root: {
-      flexGrow: 1,
+      display: "flex",
+      flexFlow: "column",
+      height: '100vh'
     },
     menuButton: {
       marginRight: theme.spacing(2),
+    },
+    main: {
+      height: '100%'
     },
     title: {
       flexGrow: 1,
@@ -100,8 +62,7 @@ const useStyles = makeStyles((theme: Theme) =>
         },
       },
     },
-  }),
-);
+  }));
 
 const RenderView: FunctionComponent<{ path?: string }> = (props) => {
   return (props.path ? <img width="100%" height="100%" alt="pdf render" src={"/api/render.py?path=" + props.path} /> : <div>nothing yet</div>);
@@ -110,11 +71,12 @@ const RenderView: FunctionComponent<{ path?: string }> = (props) => {
 export const App: FunctionComponent<{}> = () => {
   const classes = useStyles();
 
-  const [selection, setSelection] = useState<string | undefined>(undefined);
+  const [viewedDocument, setViewedDocument] = useState<string | undefined>(undefined);
   const [search, setSearch] = useState<string | undefined>(undefined);
 
   return (
-    <Box className={classes.root}>
+    <div className={classes.root}>
+      <CssBaseline />
       <AppBar position="sticky">
         <Toolbar>
           <IconButton
@@ -144,15 +106,16 @@ export const App: FunctionComponent<{}> = () => {
           </div>
         </Toolbar>
       </AppBar>
-      <Grid container direction="row">
-        <Grid item xs={10} md={5}>
-          <DocList search={search} setSelection={(s) => setSelection(s)} />
+      <Grid container style={{ height: '100%' }}>
+        <Grid item xs={6} lg={7}>
+            <DocList search={search} setSelection={(s) => setViewedDocument(s)} />
         </Grid>
-        <Grid item xs={10} md={5}>
-          <RenderView path={selection} />
+        <Grid item xs={6} lg={5}>
+          <RenderView path={viewedDocument} />
         </Grid>
+
       </Grid>
-    </Box>
+    </div>
   );
 }
 
