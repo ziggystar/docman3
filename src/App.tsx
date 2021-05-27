@@ -1,7 +1,9 @@
-import { AppBar, Box, Container, createStyles, CssBaseline, fade, Grid, Icon, IconButton, InputBase, makeStyles, Paper, Theme, Toolbar, Typography } from '@material-ui/core';
+import { AppBar, Box, Button, Card, CardActionArea, CardActions, CardContent, Collapse, Container, createStyles, CssBaseline, fade, FormControl, Grid, Hidden, Icon, IconButton, InputBase, makeStyles, Paper, TextField, Theme, Toolbar, Typography } from '@material-ui/core';
+import AwesomeDebouncePromise from 'awesome-debounce-promise';
 import React, { FunctionComponent, useState } from 'react';
 import './App.css';
 import { DocList } from './DocList';
+import { Doc } from './Types';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -72,7 +74,10 @@ export const App: FunctionComponent<{}> = () => {
   const classes = useStyles();
 
   const [viewedDocument, setViewedDocument] = useState<string | undefined>(undefined);
+  const [editedDocument, setEditedDocument] = useState<Doc | undefined>(undefined);
   const [search, setSearch] = useState<string | undefined>(undefined);
+
+  const setSearchDebounce = AwesomeDebouncePromise( setSearch, 1000);
 
   return (
     <div className={classes.root}>
@@ -101,16 +106,30 @@ export const App: FunctionComponent<{}> = () => {
                 input: classes.inputInput,
               }}
               inputProps={{ 'aria-label': 'search' }}
-              onChange={(event) => setSearch(event.target.value)}
+              onChange={(event) => setSearchDebounce(event.target.value)}
             />
           </div>
         </Toolbar>
       </AppBar>
       <Grid container style={{ height: '100%' }}>
         <Grid item xs={6} lg={7}>
-            <DocList search={search} setSelection={(s) => setViewedDocument(s)} />
+          <DocList search={search} setSelection={setViewedDocument} setEdit={setEditedDocument}/>
         </Grid>
         <Grid item xs={6} lg={5}>
+          <Collapse in={editedDocument !== undefined}>
+            <Card>
+              <CardContent>
+                <FormControl>
+                  <TextField label="Korrespondent" defaultValue={editedDocument?.correspondent}/>
+                  <TextField label="Betreff" defaultValue={editedDocument?.subject}/>
+                  <TextField type="date" label="Datum" />
+                </FormControl>
+              </CardContent>
+              <CardActions>
+                <Button variant="contained" onClick={() => setEditedDocument(undefined)}>Submit</Button>
+              </CardActions>
+            </Card>
+          </Collapse>
           <RenderView path={viewedDocument} />
         </Grid>
 

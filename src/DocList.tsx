@@ -5,7 +5,7 @@ import { ColDef, DataGrid, ValueFormatterParams } from "@material-ui/data-grid";
 import React, { FunctionComponent, useState, useEffect } from "react";
 import { Doc } from "./Types";
 
-export const DocList: FunctionComponent<{ search: string | undefined, setSelection: (v: string) => void }> = (props) => {
+export const DocList: FunctionComponent<{ search: string | undefined, setSelection: (v: string) => void, setEdit: (v: Doc) => void }> = (props) => {
 
   const [rows, setRows] = useState<Doc[] | null>(null);
 
@@ -22,16 +22,17 @@ export const DocList: FunctionComponent<{ search: string | undefined, setSelecti
 
   const cols: ColDef[] = [
     {
-      field: "path", headerName: "Aktion", width: 150,
+      field: "path", headerName: "Aktion", width: 160,
       renderCell: (params: ValueFormatterParams) =>
         (<>
           <IconButton onClick={() => params.value && props.setSelection(params.value?.toString())}><Icon>pageview</Icon></IconButton>
           <IconButton onClick={() => params.value && window.open("/api/download.py?path=" + params.value?.toString())}><Icon>download</Icon></IconButton>
+          <IconButton onClick={() => params.value && props.setEdit(params.data as Doc)}><Icon>edit</Icon></IconButton>
         </>)
     },
-    { field: "correspondent", headerName: "Korrepondent", width: 100 },
-    { field: "subject", headerName: "Betreff", width: 300 },
-    { field: "date", headerName: "Datum", type: "date", width: 130 }];
+    { field: "correspondent", headerName: "Korrepondent", width: 160 },
+    { field: "subject", headerName: "Betreff", width: 400 },
+    { field: "date", headerName: "Datum", type: "date", width: 150 }];
 
   return <DataGrid rows={rows ?? []} columns={cols} />;
 }
